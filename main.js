@@ -54,10 +54,10 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
 dirLight.position.set(0, 0, 1);
 scene.add(dirLight);
 
-const gridHelper = new THREE.GridHelper(100, 100);
-scene.add(gridHelper);
+// const gridHelper = new THREE.GridHelper(100, 100);
+// scene.add(gridHelper);
 
-camera.position.z = 5;
+camera.position.z = 30;
 
 let amount = 1;
 
@@ -99,6 +99,13 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener("resize", onResize, false);
 
 WebMidi.enable()
   .then(onEnabled)
