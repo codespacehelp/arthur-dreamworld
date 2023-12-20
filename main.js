@@ -8,6 +8,20 @@ function random(min, max) {
   return rng() * (max - min) + min;
 }
 
+const config = {
+  ballsAmount: 50,
+  ballScale: 1,
+  spikeAmount: 50,
+  spikeScale: 1,
+};
+
+const controllerMapping = {
+  16: { name: "ballsAmount", multiplier: 100 },
+  17: { name: "ballScale", multiplier: 1 },
+  20: { name: "spikeAmount", multiplier: 100 },
+  21: { name: "spikeScale", multiplier: 1 },
+};
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -61,18 +75,55 @@ function rebuildScene() {
   const balls = gltfObjects.getObjectByName("atom_balls"); // .material.color.setHex(0x0000ff);
   balls.position.set(0, 0, 0);
 
-  for (let i = 0; i < amount; i++) {
+  const spikes = gltfObjects.getObjectByName("atom_spikes");
+  spikes.position.set(0, 0, 0);
+
+  for (let i = 0; i < config.ballsAmount; i++) {
     const clone = balls.clone();
     clone.position.set(random(-10, 10), random(-10, 10), random(-10, 10));
+    clone.scale.set(config.ballScale, config.ballScale, config.ballScale);
     worldGroup.add(clone);
   }
-  amount;
+
+  for (let i = 0; i < config.spikeAmount; i++) {
+    const clone = spikes.clone();
+    clone.position.set(random(-10, 10), random(-10, 10), random(-10, 10));
+    clone.scale.set(config.spikeScale, config.spikeScale, config.spikeScale);
+    worldGroup.add(clone);
+  }
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  rebuildScene();
 
   renderer.render(scene, camera);
 }
 animate();
+
+WebMidi.enable()
+  .then(onEnabled)
+  .catch((err) => alert(err));
+
+function onEnabled() {
+  console.log(WebMidi.inputs);
+  // Display available MIDI input devices
+  if (WebMidi.inputs.length < 1) {
+    document.body.innerHTML += "No device detected.";
+  } else {
+    WebMidi.inputs.forEach((device, index) => {
+      // document.body.innerHTML+= `${index}: ${device.name} <br>`;
+      console.log(`${index}: ${device.name}`);
+    });
+
+    const midiController = WebMidi.inputs[0];
+    console.log(midiController.name);
+    midiController.addListener("controlchange", (e) => {
+      const controllerNumber = e.controller.number;
+      const controller = controllerMapping[controllerNumber];
+      if (!controller) return;
+      config[controller.name] = e.value * controller.multiplier;
+
+      rebuildScene();
+    });
+  }
+}
