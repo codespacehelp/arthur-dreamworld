@@ -13,3 +13,7 @@ Tech used:
 
 - WEBMIDI.js: https://webmidijs.org/
 
+
+Note that the mappings are hard-coded for the specific controller we used (AKAI MIDI MIX):
+
+![Akai MIDI MIX](.github/midimix.jpg)
