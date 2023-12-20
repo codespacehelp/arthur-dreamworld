@@ -8,6 +8,11 @@ function random(min, max) {
   return rng() * (max - min) + min;
 }
 
+// Convert a value from 0-1 to min-max
+function convertValue(v, min, max) {
+  return v * (max - min) + min;
+}
+
 const config = {
   ballsAmount: 50,
   ballScale: 1,
@@ -16,10 +21,10 @@ const config = {
 };
 
 const controllerMapping = {
-  16: { name: "ballsAmount", multiplier: 100 },
-  17: { name: "ballScale", multiplier: 1 },
-  20: { name: "spikeAmount", multiplier: 100 },
-  21: { name: "spikeScale", multiplier: 1 },
+  16: { name: "ballsAmount", min: 0, max: 100 },
+  17: { name: "ballScale", min: 0, max: 10 },
+  20: { name: "spikeAmount", min: 0, max: 100 },
+  21: { name: "spikeScale", min: 0, max: 10 },
 };
 
 const scene = new THREE.Scene();
@@ -128,7 +133,11 @@ function onEnabled() {
       const controllerNumber = e.controller.number;
       const controller = controllerMapping[controllerNumber];
       if (!controller) return;
-      config[controller.name] = e.value * controller.multiplier;
+      config[controller.name] = convertValue(
+        e.value,
+        controller.min,
+        controller.max
+      );
 
       rebuildScene();
     });
